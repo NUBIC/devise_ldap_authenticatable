@@ -16,7 +16,8 @@ module Devise
         @ldap = Net::LDAP.new(ldap_options)
         @ldap.host = ldap_config["host"]
         @ldap.port = ldap_config["port"]
-        @ldap.base = ldap_config["base"]
+        @base      = ldap_config["base"]
+        @ldap.base = @base
         @attribute = ldap_config["attribute"]
         @allow_unauthenticated_bind = ldap_config["allow_unauthenticated_bind"]
 
@@ -27,7 +28,10 @@ module Devise
         @required_groups = ldap_config["required_groups"]
         @required_attributes = ldap_config["require_attribute"]
 
-        @ldap.auth ldap_config["admin_user"], ldap_config["admin_password"] if params[:admin]
+        @admin_user     = ldap_config["admin_user"]
+        @admin_password = ldap_config["admin_password"] 
+        @ldap.auth @admin_user, @admin_password
+
         @ldap.auth params[:login], params[:password] if ldap_config["admin_as_user"]
 
         @login = params[:login]
@@ -75,8 +79,7 @@ module Devise
 
       def authenticate!
         return false unless (@password.present? || @allow_unauthenticated_bind)
-        @ldap.auth(dn, @password)
-        @ldap.bind
+        @ldap.bind_as(base: @base, filter: "(#{@attribute}=#{@login}", password: @password)
       end
 
       def authenticated?

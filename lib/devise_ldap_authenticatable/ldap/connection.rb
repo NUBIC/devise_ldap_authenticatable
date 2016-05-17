@@ -79,7 +79,7 @@ module Devise
 
       def authenticate!
         return false unless (@password.present? || @allow_unauthenticated_bind)
-        @ldap.bind_as(base: @base, filter: "(#{@attribute}=#{@login}", password: @password)
+        @ldap.bind_as(base: @base, filter: "(#{@attribute}=#{@login})", password: @password)
       end
 
       def authenticated?
